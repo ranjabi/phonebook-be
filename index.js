@@ -1,12 +1,12 @@
-require('dotenv').config()
+require('dotenv').config();
 const express = require('express');
 const app = express();
 const cors = require('cors');
-const Phonebook = require('./models/phonebook')
+const Phonebook = require('./models/phonebook');
 var morgan = require('morgan');
 
-app.use(express.static('build'));
 app.use(cors());
+app.use(express.static('build'));
 app.use(express.json());
 
 app.use(
@@ -58,9 +58,9 @@ const isExists = (name, persons) => {
 
 // get from mongoDB
 app.get('/api/persons', (request, response) => {
-  Phonebook.find({}).then(data => {
-    response.json(data)
-  })
+  Phonebook.find({}).then((data) => {
+    response.json(data);
+  });
 });
 
 app.get('/info', (request, response) => {
@@ -72,9 +72,20 @@ app.get('/info', (request, response) => {
 app.get('/api/persons/:id', (request, response) => {
   const id = Number(request.params.id);
   // const person = persons.find((person) => person.id === id);
-  Phonebook.findById(request.params.id).then(person => {
-    response.json(person).catch(err => console.log(err.message))
-  })
+  Phonebook.findById(request.params.id)
+    .then(person => {
+      if (person) {
+        response.json(person)
+      } else {
+        response.status(400).end()
+      }
+    })
+    .catch((err) => {
+      // malformed id
+      console.log(err);
+      // console.log(err.message);
+      response.status(500).end()
+    });
 
   // if (person) {
   //   response.json(person);
@@ -115,15 +126,14 @@ app.post('/api/persons', (request, response) => {
   //     error: 'name already exists',
   //   });
   // }
-  console.log('nyampe')
   const person = new Phonebook({
     name: body.name,
     number: body.number,
   });
 
-  person.save().then(savedPerson => {
-    response.json(savedPerson)
-  })
+  person.save().then((savedPerson) => {
+    response.json(savedPerson);
+  });
 });
 
 const PORT = process.env.PORT || 3001;
