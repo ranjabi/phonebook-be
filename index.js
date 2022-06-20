@@ -56,6 +56,7 @@ const isExists = (name, persons) => {
   return false;
 };
 
+// get from mongoDB
 app.get('/api/persons', (request, response) => {
   Phonebook.find({}).then(data => {
     response.json(data)
@@ -70,13 +71,16 @@ app.get('/info', (request, response) => {
 
 app.get('/api/persons/:id', (request, response) => {
   const id = Number(request.params.id);
-  const person = persons.find((person) => person.id === id);
+  // const person = persons.find((person) => person.id === id);
+  Phonebook.findById(request.params.id).then(person => {
+    response.json(person).catch(err => console.log(err.message))
+  })
 
-  if (person) {
-    response.json(person);
-  } else {
-    response.status(404).end();
-  }
+  // if (person) {
+  //   response.json(person);
+  // } else {
+  //   response.status(404).end();
+  // }
 });
 
 app.delete('/api/persons/:id', (request, response) => {
@@ -93,7 +97,12 @@ const generateId = () => {
 
 app.post('/api/persons', (request, response) => {
   const body = request.body;
-  console.log(body);
+  // console.log(body);
+
+  // bisa juga pake undefined
+  // if (body.content === undefined) {
+  //   return response.status(400).json({ error: 'content missing' })
+  // }
 
   if (!body.name || !body.number) {
     return response.status(400).json({
@@ -101,20 +110,20 @@ app.post('/api/persons', (request, response) => {
     });
   }
 
-  if (isExists(body.name, persons)) {
-    return response.status(400).json({
-      error: 'name already exists',
-    });
-  }
-
-  const person = {
+  // if (isExists(body.name, persons)) {
+  //   return response.status(400).json({
+  //     error: 'name already exists',
+  //   });
+  // }
+  console.log('nyampe')
+  const person = new Phonebook({
     name: body.name,
     number: body.number,
-    id: generateId(),
-  };
+  });
 
-  persons = persons.concat(person);
-  response.json(body);
+  person.save().then(savedPerson => {
+    response.json(savedPerson)
+  })
 });
 
 const PORT = process.env.PORT || 3001;
