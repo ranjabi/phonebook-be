@@ -1,13 +1,13 @@
-require('dotenv').config();
-const express = require('express');
-const app = express();
-const cors = require('cors');
-const Phonebook = require('./models/phonebook');
-var morgan = require('morgan');
+require('dotenv').config()
+const express = require('express')
+const app = express()
+const cors = require('cors')
+const Phonebook = require('./models/phonebook')
+var morgan = require('morgan')
 
-app.use(cors());
-app.use(express.static('build'));
-app.use(express.json());
+app.use(cors())
+app.use(express.static('build'))
+app.use(express.json())
 
 app.use(
   morgan((tokens, req, res) => {
@@ -20,9 +20,9 @@ app.use(
       tokens['response-time'](req, res),
       'ms',
       JSON.stringify(req.body),
-    ].join(' ');
+    ].join(' ')
   })
-);
+)
 
 let persons = [
   {
@@ -45,66 +45,50 @@ let persons = [
     name: 'Mary Poppendieck',
     number: '39-23-6423122',
   },
-];
-
-const isExists = (name, persons) => {
-  for (let person of persons) {
-    if (name === person.name) {
-      return true;
-    }
-  }
-  return false;
-};
+]
 
 // get from mongoDB
 app.get('/api/persons', (request, response) => {
   Phonebook.find({}).then((data) => {
-    response.json(data);
-  });
-});
+    response.json(data)
+  })
+})
 
 app.get('/info', (request, response) => {
   response.send(
     `<p>Phonebook has info for ${persons.length} people</p><p>${new Date()}</p>`
-  );
-});
+  )
+})
 
 app.get('/api/persons/:id', (request, response, next) => {
-  const id = Number(request.params.id);
   // const person = persons.find((person) => person.id === id);
   Phonebook.findById(request.params.id)
     .then((person) => {
       if (person) {
-        response.json(person);
+        response.json(person)
       } else {
-        response.status(400).end();
+        response.status(400).end()
       }
     })
-    .catch((error) => next(error));
+    .catch((error) => next(error))
 
   // if (person) {
   //   response.json(person);
   // } else {
   //   response.status(404).end();
   // }
-});
+})
 
 app.delete('/api/persons/:id', (request, response, next) => {
-  const id = Number(request.params.id);
   Phonebook.findByIdAndRemove(request.params.id)
     .then((result) => {
-      response.status(204).end();
+      response.status(204).end()
     })
-    .catch((err) => next(err));
-});
-
-const generateId = () => {
-  const maxId = persons.length > 0 ? Math.max(...persons.map((n) => n.id)) : 0;
-  return maxId + 1;
-};
+    .catch((err) => next(err))
+})
 
 app.post('/api/persons', (request, response, next) => {
-  const body = request.body;
+  const body = request.body
   // console.log(body);
 
   // bisa juga pake undefined
@@ -115,39 +99,39 @@ app.post('/api/persons', (request, response, next) => {
   const person = new Phonebook({
     name: body.name,
     number: body.number,
-  });
+  })
 
   person
     .save()
     .then((savedPerson) => {
-      response.json(savedPerson);
+      response.json(savedPerson)
     })
-    .catch((err) => next(err));
+    .catch((err) => next(err))
   // database constraint is handled by mongoDB validations
-});
+})
 
 const unknownEndpoint = (request, response) => {
-  response.status(404).send({ error: 'unknown endpoint' });
-};
+  response.status(404).send({ error: 'unknown endpoint' })
+}
 
 // handler of requests with unknown endpoint
-app.use(unknownEndpoint);
+app.use(unknownEndpoint)
 
 const errorHandler = (error, request, response, next) => {
-  console.error(error.message);
+  console.error(error.message)
 
   if (error.name === 'CastError') {
-    return response.status(400).send({ error: 'malformatted id' });
+    return response.status(400).send({ error: 'malformatted id' })
   } else if (error.name === 'ValidationError') {
-    return response.status(400).json({error: error.message})
+    return response.status(400).json({ error: error.message })
   }
 
-  next(error);
-};
+  next(error)
+}
 
 // handler of requests with result to errors
-app.use(errorHandler);
+app.use(errorHandler)
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT);
-console.log(`Server running on port ${PORT}`);
+const PORT = process.env.PORT || 3001
+app.listen(PORT)
+console.log(`Server running on port ${PORT}`)
