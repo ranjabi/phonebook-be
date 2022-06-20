@@ -13,8 +13,14 @@ mongoose
   });
 
 const phonebookSchema = new mongoose.Schema({
-  name: String,
-  number: Number,
+  name: {
+    type: String,
+    required: true
+  },
+  number: {
+    type: Number,
+    required: true
+  },
 });
 
 phonebookSchema.set('toJSON', {
