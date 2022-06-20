@@ -1,3 +1,3 @@
-Deployed build:
+Part of https://github.com/ranjabi/fullstackopen2022.
 
-https://stormy-plateau-96821.herokuapp.com/
+Deployed build: https://stormy-plateau-96821.herokuapp.com/
