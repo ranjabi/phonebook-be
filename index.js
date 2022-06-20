@@ -84,7 +84,7 @@ app.get('/api/persons/:id', (request, response) => {
       // malformed id
       console.log(err);
       // console.log(err.message);
-      response.status(500).end()
+      response.status(400).send({ error: 'malformatted id' })
     });
 
   // if (person) {
